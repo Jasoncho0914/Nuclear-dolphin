@@ -1,3 +1,2 @@
-#R scripts for Competition I 
+#R script for Competition I 
 #lt342, [insert netid], [insert netid]
-
