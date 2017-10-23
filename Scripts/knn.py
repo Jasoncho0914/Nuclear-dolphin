@@ -6,23 +6,7 @@ import sys
 from sklearn.cluster import KMeans
 from Utility import assignClusters
 from Utility import createPred
-
-def writeCSV(data, name, header=None):
-    data = list(data)
-    with open("./Scripts/Results/" + name + ".csv",'wb') as resultFile:
-        wr = csv.writer(resultFile)
-        if header:
-            if type(header) == type([]):
-                wr.writerow(header)
-            else:
-                wr.writerow([header])
-            header = None
-        
-        for x in data:
-            if type(x) == type([]):
-                wr.writerow(x)
-            else:
-                wr.writerow([x])
+from Utility import writeCSV
 
 def loadData(path):
     seed = np.array(pd.read_csv("./data/Seed.csv", header=None))

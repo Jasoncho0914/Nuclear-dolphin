@@ -30,8 +30,30 @@ def createPred(seed, cluster, result):
                 maxCount = val.count(n)
         # print cluster[key]
         # matchedInt.add(cluster[key])
-    result = [[i+1, cluster[x[0]]] for i, x in enumerate(result)]
+    try: 
+        result = [[i+1, cluster[x[0]]] for i, x in enumerate(result)]
+    except Exception:
+        return None
     return result
+
+
+def writeCSV(data, name, header=None):
+    data = list(data)
+    with open("./Scripts/Results/" + name + ".csv",'wb') as resultFile:
+        wr = csv.writer(resultFile)
+        if header:
+            if type(header) == type([]):
+                wr.writerow(header)
+            else:
+                wr.writerow([header])
+            header = None
+        
+        for x in data:
+            if type(x) == type([]):
+                wr.writerow(list(x))
+            else:
+                wr.writerow([x])
+
 
 if __name__ == "__main__":
     resultPath = sys.argv[1]
