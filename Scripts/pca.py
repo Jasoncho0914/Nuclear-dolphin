@@ -11,8 +11,8 @@ from Utility import writeCSV
 # np.savetxt('pca_data/pca{}.csv'.format(K), new_matrix, delimiter=',')
 if __name__ == "__main__":
 	K = int(sys.argv[1])
+	print K
 	train = pd.read_csv('./data/Extracted_features.csv', header=None)
-	n_components = 30
 	pca = PCA(n_components=K)
 	pca_train = pca.fit_transform(train.values)
 	writeCSV(pca_train.tolist(), 'pca_Extracted_features' + str(K))
