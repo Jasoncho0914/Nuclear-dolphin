@@ -14,8 +14,10 @@ from Utility import writeCSV
 # np.savetxt('pca_data/pca{}.csv'.format(K), new_matrix, delimiter=',')
 if __name__ == "__main__":
 	K = int(sys.argv[1])
-	print K
-	train = pd.read_csv('./data/Extracted_features.csv', header=None)
+
+	data_matrix = np.asmatrix(np.loadtxt(open(os.path.realpath("../data/Extracted_features.csv"), "rb"), delimiter=","))
 	pca = PCA(n_components=K)
-	pca_train = pca.fit_transform(train.values)
-	writeCSV(pca_train.tolist(), 'pca_Extracted_features' + str(K))
+	new_matrix = pca.fit_transform(data_matrix)
+	np.savetxt('Results/pca{}.csv'.format(K), new_matrix, delimiter=',')
+
+
