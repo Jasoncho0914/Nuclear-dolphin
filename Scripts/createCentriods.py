@@ -42,13 +42,13 @@ def writeData(data, name):
     for i in range(len(data)):
         data[i] = list(data[i])
 
-    with open(name + ".csv",'wb') as resultFile:
+    with open("./Scripts/Results/" + name + ".csv",'wb') as resultFile:
         wr = csv.writer(resultFile)
         wr.writerows(data)
 
 if __name__ == "__main__":
-    Graph = np.array(pd.read_csv("fa2017_competition_1/Graph.csv"))
-    train = train = np.array(pd.read_csv("fa2017_competition_1/Extracted_features.csv"))
+    Graph = np.array(pd.read_csv("./data/Graph.csv"))
+    train = np.array(pd.read_csv("./data/Extracted_features.csv"))
 
     clusters = createSets(Graph)
     centriods = calculateCentriods(train, clusters)
