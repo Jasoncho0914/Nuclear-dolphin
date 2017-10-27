@@ -5,14 +5,10 @@ import time
 import sys
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
-from calculateAccuracy import assignClusters
 
-def writeCSV(data, name):
-    data = list(data)
-    with open("./Scripts/Results/" + name + ".csv",'wb') as resultFile:
-        wr = csv.writer(resultFile)
-        for x in data:
-            wr.writerow([x])
+from Utility import assignClusters
+from Utility import createPred
+from Utility import writeCSV
 
 def loadData(path):
     seed = np.array(pd.read_csv("./data/Seed.csv", header=None))
@@ -20,7 +16,7 @@ def loadData(path):
     return seed, train
 
 def runSpectralClustering(train):
-    sc = SpectralClustering(n_clusters=10, random_state=0, n_jobs=2).fit(train)
+    sc = SpectralClustering(n_clusters=10, affinity='nearest_neighbors').fit(train)
     labels = sc.labels_
     return labels
 
@@ -31,12 +27,18 @@ if __name__ == '__main__':
 
     print 'Loading data...'
     seed, train = loadData(path)
+
     print 'Running Spectral Clustering...'
+
     labels = runSpectralClustering(train)
     print 'Creating CSV File...'
-    name = 'SCLabels1'
+    name = 'SCLabels'
     writeCSV(labels, name)
+
     print 'Visualing clusters...'
     result = np.array(pd.read_csv("./Scripts/Results/" + name + '.csv', header=None))
-    assignClusters(seed, result)
+    cluster = assignClusters(seed, result)
+
+    # pred = createPred(seed, cluster, result)
+    # writeCSV(pred[6000:], 'SCPred', ['Id', 'Label'])
     print time.time() - start

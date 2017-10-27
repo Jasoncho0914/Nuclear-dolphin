@@ -11,11 +11,11 @@ from Utility import writeCSV
 # np.savetxt('pca_data/pca{}.csv'.format(K), new_matrix, delimiter=',')
 if __name__ == "__main__":
 	K = int(sys.argv[1])
-	print K
 	train = pd.read_csv('./data/Extracted_features.csv', header=None)
 	pca = PCA(n_components=K)
 	pca_train = pca.fit_transform(train.values)
 	writeCSV(pca_train.tolist(), 'pca_Extracted_features' + str(K))
+	print 'Created ' + 'pca_Extracted_features' + str(K) + '.csv'
 
 # data_mu = np.average(data_matrix, axis=1)
 #

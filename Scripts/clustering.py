@@ -10,54 +10,51 @@ from sklearn.cluster import Birch
 from sklearn.cluster import FeatureAgglomeration
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.mixture import GaussianMixture
+
 from Utility import assignClusters
 from Utility import createPred
 from Utility import writeCSV
+from Utility import initClusters
+from Utility import calculateCentriods
 
+#=======================================================================
+#Playground script for testing and trying out different scripts
+#=======================================================================
 def loadData(path):
     seed = np.array(pd.read_csv("./data/Seed.csv", header=None))
     train = np.array(pd.read_csv(path, header=None))
-    return seed, train
+    graph = np.array(pd.read_csv("./data/Graph.csv", header=None))
+    return seed, train, graph
 
-def runClustering(train):
-    # kmeans = KMeans(n_clusters=10).fit(train)
-    ac = AgglomerativeClustering(n_clusters=10).fit(train)
-    # b = Birch(n_clusters=10).fit(train)
-    # db = DBSCAN().fit(train)
-    # fa = FeatureAgglomeration(n_clusters=10).fit(train)
-    # mb = MiniBatchKMeans(n_clusters=10).fit(train)
-    labels = ac.labels_
+def runClustering(train, centriods=None):
+    kmeans = KMeans(n_clusters=10, init=centriods).fit(train)
+    # ac = AgglomerativeClustering(n_clusters=10).fit(train)
+    # labels = ac.labels_
+    labels = kmeans.labels_
     return labels
 
 if __name__ == '__main__':
     path = sys.argv[1]
+    output = sys.argv[2]
 
     print 'Loading data...'
-    seed, train = loadData(path)
+    seed, train, graph = loadData(path)
 
-    
-    preds = []
+    print 'Creating initial clusters...'
+    clusters = initClusters(seed, graph, 1)
+    centriods = calculateCentriods(train, clusters)
 
-    for _ in range(1):
-        print 'Running clustering algorithm...'
-        labels = runClustering(train)
+    print 'Running clustering algorithm...'
+    labels = runClustering(train, centriods)
 
-        print 'Creating CSV File...'
-        name = 'ClusteringLabels'
-        writeCSV(labels, name)
+    print 'Creating CSV File...'
+    name = 'ClusteringLabels'
+    writeCSV(labels, name)
 
-        print 'Visualing clusters...'
-        result = np.array(pd.read_csv("./Scripts/Results/" + name + '.csv', header=None))
-        cluster = assignClusters(seed, result)
+    print 'Visualing clusters...'
+    result = np.array(pd.read_csv("./Scripts/Results/" + name + '.csv', header=None))
+    cluster = assignClusters(seed, result)
 
-        pred = createPred(seed, cluster, result)
-        # if pred:
-        #     preds.append(pred)
-
-    # for i in range(len(preds[0])):
-    #     digit = [0]*11
-    #     for j in range(len(preds)):
-    #         digit[preds[j][i][1]]+=1
-    #     pred[i] = [pred[i][0], digit.index(max(digit))]
-
-    writeCSV(pred[6000:], 'ClusteringPred', ['Id', 'Label'])
+    print 'Creating prediction...'
+    pred = createPred(seed, cluster, result)
+    writeCSV(pred[6000:], output, ['Id', 'Label'])
