@@ -7,6 +7,7 @@ import time
 
 
 def assignClusters(seed, result):
+    #Maps cluster output by the clustering algorithm to actual digit value
     j = 0
     cluster = {}
     for i in range(len(result)):
@@ -20,6 +21,8 @@ def assignClusters(seed, result):
 
 #mathces by frequency. If cluster 1 gets mapped to digit 2 the most, cluster 1 = 2. 
 def createPred(seed, cluster, result):
+    #seed = Seed.csv
+    #cluster = mapping of cluster output by clustering algorithm to actual digit value
     matchedInt = set([])
     for key, val in cluster.items():
         maxCount = 0
@@ -39,20 +42,21 @@ def createPred(seed, cluster, result):
                 if j not in matchedInt:
                     cluster[i] = j
 
+    #
     print cluster
-    input = raw_input("Change anything?: ")
+    input = raw_input("Change anything? (Press enter to skip): ")
     if input != "":
         done = False
     else:
         done = True
     while not done:
-        key = int(raw_input("Enter key: "))
-        val = int(raw_input("Enter val: "))
+        key = int(raw_input("Enter key (Press enter to skip): "))
+        val = int(raw_input("Enter val (Press enter to skip): "))
         if key in cluster and val in cluster:
             cluster[key] = val
         else:
             break
-        cont = raw_input("Continue change?: ")
+        cont = raw_input("Continue change? (Press enter to skip): ")
         if cont == "":
             done = True
     print cluster
@@ -92,6 +96,7 @@ def createConnectivityMatrix(data, size=10000):
 
 
 def initClusters(seed, graph, depth=1):
+    #Creates inital centriods based on seed and similarity graph
     #Graph -> dictionary 
     graphDict = {}
     for x, y in graph:
@@ -117,6 +122,7 @@ def initClusters(seed, graph, depth=1):
 
 
 def calculateCentriods(data, cluster):
+    #Calculates centriods based on init cluster created by initClusters
     centriods = []
     for key, val in cluster.items():
         s = 0
