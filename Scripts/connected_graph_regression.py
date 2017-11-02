@@ -6,29 +6,21 @@ import os
 import numpy as np
 import tflearn
 import tensorflow as tf
+import jsonpickle as jp
 
 import copy
 
 import random
 
-class linreg_model():
-    def __init__(self, inputs, outputs):
-        self.linmodel = LinearRegression()
-        self.linmodel.fit(inputs, outputs)
-    def predict(self, inputs):
-        predictions =  self.linmodel.predict(inputs)
-        return predictions
-
-def split_set(s):
+def split_set(s, fraction):
     s1 = set()
     s2 = set()
 
     for i, x in enumerate(s):
-        if i % 2 == 0:
+        if not i % fraction == 0:
             s1.add(x)
         else:
             s2.add(x)
-
     return s1, s2
 
 def create_train_set(dataset, connected_pairs, unconnected_pairs):
@@ -63,7 +55,7 @@ def main():
     print("edge count {}".format(edge_count))
 
     scores = []
-    train_set_size = 2000
+    train_set_size = 500000
     try:
         while train_set_size < edge_count / 2:
             print("Training for training set size of {}".format(train_set_size))
@@ -80,16 +72,16 @@ def main():
 
             # same for unconnected datapoints
             train_unconnected_pairs = set()
-            while len(train_unconnected_pairs) < train_set_size:
+            while len(train_unconnected_pairs) < train_set_size * 4:
                 a = random.randint(0, 6000-1)
                 b = random.randint(0, 6000-1)
                 tup = (a,b,)
-                if not (a in graph and b in graph[a]) and tup not in train_unconnected_pairs:
+                if not (a in graph and b in graph[a]):
                     train_unconnected_pairs.add(tup)
 
             # partition into train and validation sets
-            train_connected_pairs, dev_connected_pairs = split_set(train_connected_pairs)
-            train_unconnected_pairs, dev_unconnected_pairs = split_set(train_unconnected_pairs)
+            train_connected_pairs, dev_connected_pairs = split_set(train_connected_pairs, 5)
+            train_unconnected_pairs, dev_unconnected_pairs = split_set(train_unconnected_pairs, 5)
 
             # now assemble into training matrix and validation matrix
             train_inputs, train_outputs = create_train_set(data_matrix, train_connected_pairs, train_unconnected_pairs)
@@ -99,7 +91,7 @@ def main():
             print("Train Model ... ")
             # model = SVR(kernel='rbf', C=1e3, gamma=0.1) # LinearRegression()
             # model.fit(train_inputs, train_outputs)
-            model = MLPClassifier(hidden_layer_sizes=(18, 18, 18, 18,), early_stopping=True)
+            model = MLPClassifier(hidden_layer_sizes=(25, 25, 25, 25,), early_stopping=True)
             model.fit(train_inputs, train_outputs)
 
             # tf.reset_default_graph() # necessary for making new nnets without cryptic error
@@ -119,6 +111,8 @@ def main():
 
             # test the model
             print("Score Model ... ")
+            false_positives = 0
+            false_negatives = 0
             right = 0
             total = 0
             guesses = np.ndarray.tolist(model.predict(dev_inputs))
@@ -130,10 +124,22 @@ def main():
                 # print("{}, {}".format(guess, correct))
                 if (guess <= 0 and correct <= 0) or guess >= 0 and correct >= 0:
                     right += 1
+                else:
+                    if correct == -1:
+                        false_positives += 1
+                    else:
+                        false_negatives += 1
                 total += 1
             print()
             print("Percentage correct: {} of {}".format(round(right * 100 / total, 2), total))
+            print("False positives: {}".format(round(false_positives*100 / total, 2)))
+            print("False negatives: {}".format(round(false_negatives * 100 / total, 2)))
             scores.append( ( round(right * 100 / total, 2), train_set_size,))
+
+            print("Writing to file...")
+            f = open('models/predict_connection_{}.json'.format(train_set_size), 'w')
+            f.write(jp.encode(model))
+            f.close()
 
             train_set_size *= 2
     except KeyboardInterrupt:
@@ -141,6 +147,7 @@ def main():
         print(scores)
         quit()
     print(scores)
+    print("DONE")
 
 
 
