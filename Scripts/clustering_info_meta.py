@@ -21,7 +21,7 @@ import random
 def cos_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-def load_graph():
+def load_graph( adjlists = False):
     adj = {}
     for line in open(os.path.realpath("./data/Graph.csv"), 'r'):
         line = line.rstrip()
@@ -32,17 +32,29 @@ def load_graph():
             # convert to indices
             a = a-1
             b = b-1
-            if a not in adj:
-                adj[a] = set()
-                adj[a].add(b)
-            else:
-                adj[a].add(b)
 
-            if b not in adj:
-                adj[b] = set()
-                adj[b].add(a)
+            if adjlists:
+                if a not in adj:
+                    adj[a] = [b]
+                else:
+                    adj[a].append(b)
+
+                if b not in adj:
+                    adj[b] = [a]
+                else:
+                    adj[b].append(a)
             else:
-                adj[b].add(a)
+                if a not in adj:
+                    adj[a] = set()
+                    adj[a].add(b)
+                else:
+                    adj[a].add(b)
+
+                if b not in adj:
+                    adj[b] = set()
+                    adj[b].add(a)
+                else:
+                    adj[b].add(a)
     return adj
 
 def save_bar_chart(values, increment, fname):
